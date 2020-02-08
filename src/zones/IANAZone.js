@@ -102,8 +102,17 @@ export default class IANAZone extends Zone {
       dtf = makeDTF(this.zoneName),
       [fYear, fMonth, fDay, fHour, fMinute, fSecond] = dtf.formatToParts
         ? partsOffset(dtf, date)
-        : hackyOffset(dtf, date),
-      asUTC = Date.UTC(fYear, fMonth - 1, fDay, fHour, fMinute, fSecond);
+        : hackyOffset(dtf, date); // work around https://bugs.chromium.org/p/chromium/issues/detail?id=1025564&can=2&q=%2224%3A00%22%20datetimeformat
+    adjustedHour = hour === 24 ? 0 : hour;
+
+    const asUTC = Date.UTC(
+      fYear,
+      fMonth - 1,
+      fDay,
+      adjustedHour,
+      fMinute,
+      fSecond
+    );
     let asTS = date.valueOf();
     asTS -= asTS % 1000;
     return (asUTC - asTS) / (60 * 1000);
